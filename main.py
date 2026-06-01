@@ -28,3 +28,63 @@ class Ingredient:
     
 #fl = Ingredient('мука', 2, 'кг')
 #print(fl)
+
+class Recipe:
+    def __init__(self, title, ingredients=None):
+        self.title = title
+        self.ingredients = ingredients if ingredients is not None else []
+
+    def add_ingredient(self, ingredient):
+        for item in self.ingredients:
+            if item == ingredient:
+                item.quantity += ingredient.quantity
+                return
+        self.ingredients.append(ingredient)
+
+    @staticmethod
+    def is_valid_ratio(ratio):
+        return isinstance(ratio, (int, float)) and ratio > 0
+
+    def scale(self, ratio):
+        new_ingredients = []
+        for item in self.ingredients:
+            new_ingredients.append(Ingredient(item.name, item.quantity * ratio, item.unit))
+        return Recipe(self.title, new_ingredients)
+
+    def __len__(self):
+        return len(self.ingredients)
+
+    def __str__(self):
+        lines = [f"Рецепт: {self.title}"]
+        
+        for item in self.ingredients:
+            lines.append(f"- {item}")
+        return "\n".join(lines)
+    
+class ShoppingList:
+    def __init__(self):
+        self._items = []
+
+    def add_recipe(self, recipe, portions):
+        if portions <= 0:
+            raise ValueError("Количество порций должно быть положительным")
+        scaled_recipe = recipe.scale(portions)
+        for ingredient in scaled_recipe.ingredients:
+            self._items.append((ingredient, recipe.title))
+
+    def remove_recipe(self, title):
+        self._items = [item for item in self._items if item[1] != title]
+
+    def get_list(self):
+        summary = {}
+        for ingredient, _ in self._items:
+            key = (ingredient.name, ingredient.unit)
+            summary[key] = summary.get(key, 0.0) + ingredient.quantity
+        
+        result = [Ingredient(name, qty, unit) for (name, unit), qty in summary.items()]
+        return sorted(result, key=lambda x: x.name)
+
+    def __add__(self, other):
+        new_list = ShoppingList()
+        new_list._items = self._items + other._items
+        return new_list
