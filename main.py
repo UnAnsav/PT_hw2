@@ -88,3 +88,21 @@ class ShoppingList:
         new_list = ShoppingList()
         new_list._items = self._items + other._items
         return new_list
+
+class DietaryRecipe(Recipe):
+    def __init__(self, title, diet_type, ingredients=None):
+        super().__init__(title, ingredients)
+        self.diet_type = diet_type
+
+    def scale(self, ratio):
+        scaled_base = super().scale(ratio)
+        return DietaryRecipe(self.title, self.diet_type, scaled_base.ingredients)
+
+    def __str__(self):
+        return f"[{self.diet_type}] {super().__str__()}"
+    
+#dr = DietaryRecipe("Салат", "веган")
+#dr.add_ingredient(Ingredient("Огурец", 1, "шт"))
+#print(dr)
+#print("#########")
+#print(dr.scale(3))
